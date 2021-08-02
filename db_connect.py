@@ -6,10 +6,10 @@ from firebase_admin import db
 # %% # Firebase database 인증 및 앱 초기화
 
 cred = credentials.Certificate(
-    './andr/firebaseCert.json')
+    './andr/supportapp-f34a1-firebase-adminsdk-gzyie-87ed2eb9ba.json')
 
 firebase_admin.initialize_app(
-    cred, {'databaseURL': 'firebaseDBURL'})
+    cred, {'databaseURL': 'https://supportapp-f34a1-default-rtdb.firebaseio.com'})
 
 # %% 기본 위치 지정
 ref = db.reference('target')
@@ -24,12 +24,11 @@ target_df = pd.DataFrame(target).T.fillna('')
 # %%
 tmp = []
 for key, s in target_df.subject.iteritems():
-    tmp.append(pd.Series(data={'lCategory': s[0]['lCategory'],
-                               'mCategory': s[0]['mCategory'],
-                               'sCategory': s[0]['sCategory']},
+    tmp.append(pd.Series(data={'lCategory': s['lCategory'],
+                               'mCategory': s['mCategory'],
+                               'sCategory': s['sCategory']},
                          name=key))
-    print(key, s[0]['lCategory'] + ' ' + s[0]
-          ['mCategory'] + ' ' + s[0]['sCategory'])
+    print(key, s['lCategory'] + ' ' + s['mCategory'] + ' ' + s['sCategory'])
 subject_df = pd.DataFrame(tmp)
 subject_df.to_csv('./data/target-subject.csv')
 # %%
