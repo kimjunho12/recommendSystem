@@ -48,12 +48,17 @@ model.fit(subject_text_df, target_tt, epochs=400)
 
 
 def return_target(intclasses):
+    reco_target = {}
     for intclass in intclasses:
         print('-'*10)
         for x in intclass[::-1][:10]:
             print(target.index[x])
+            reco_target[target.index[x]] = True
+    return reco_target
 
 
+def predict(liked_target):
+    return np.argsort(model.predict([list(liked_target)]))
 # %%
 return_target(np.argsort(model.predict([['K-pop'], ['하키']])))
 return_target(np.argsort(model.predict([['K-pop', '서울과학기술대학교']])))
@@ -79,19 +84,27 @@ return_target(np.argsort(model.predict([['K-pop', '서울과학기술대학교']
 # %% # Firebase database 인증 및 앱 초기화
 
 cred = credentials.Certificate(
-    './andr/supportapp-f34a1-firebase-adminsdk-gzyie-87ed2eb9ba.json')
+    './andr/supportapp-f34a1-firebase-adminsdk-gzyie-78c718f2be.json')
 
 firebase_admin.initialize_app(
     cred, {'databaseURL': 'https://supportapp-f34a1-default-rtdb.firebaseio.com'})
-# %%
+# %% 사용자 찜목록 기반 추천 후 DB 저장
 ref = db.reference('Users')
-user = ref.get()
-user_df = pd.DataFrame(user).T.fillna('')
-# %% [n] 번째 유저의 선호도 조사 결과 추출
-n = 0
-user_df.iloc[n]['like'].keys()
-# %% [n] 번째 유저의 맞춤 추천 결과
-return_target(np.argsort(model.predict(
-    [list(user_df.iloc[n]['like'].keys())])))
 
+snapshot = ref.order_by_key().get()
+for key, val in snapshot.items():
+    ref.child(key).child('reco').set(return_target(predict(val['like'].keys())))
+
+# # %%
+# user = ref.get()
+# user_df = pd.DataFrame(user).T.fillna('')
+# # %% [n] 번째 유저의 선호도 조사 결과 추출
+# n = 0
+# user_df.iloc[n]['like'].keys()
+# # %% [n] 번째 유저의 맞춤 추천 결과
+# return_target(np.argsort(model.predict(
+#     [list(user_df.iloc[n]['like'].keys())])))
+
+# # %%
+# return_target(predict(user_df.iloc[n]['like'].keys()))
 # %% 결과에서 기존에 좋아하는 사람으로 되어있을때 처리 필요
