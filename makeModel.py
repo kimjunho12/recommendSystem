@@ -93,7 +93,10 @@ ref = db.reference('Users')
 
 snapshot = ref.order_by_key().get()
 for key, val in snapshot.items():
-    ref.child(key).child('reco').set(return_target(predict(val['like'].keys())))
+    try :
+        ref.child(key).child('reco').set(return_target(predict(val['like'].keys())))
+    except Exception as E :
+        print(E)
 
 # # %%
 # user = ref.get()
