@@ -1,8 +1,10 @@
 # %%
+from os import name
 from firebase_admin import db
 from firebase_admin import credentials
 import firebase_admin
 import numpy as np
+from numpy.lib.function_base import vectorize
 import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
@@ -31,9 +33,11 @@ inputs = keras.Input(shape=(None,), dtype=tf.string, name='Input_Layer')
 indexer = preprocessing.StringLookup(
     output_mode='binary', name='One_Hot_Layer')
 indexer.adapt(subject_text_df)
-x = indexer(inputs)
+v_input = indexer(inputs)
+clayer = layers.Dense(len(target)*40, activation='relu', name='Classify_Layer')
+c_data = clayer(v_input)
 classer = layers.Dense(len(target), activation='softmax', name='Output_Layer')
-outputs = classer(x)
+outputs = classer(c_data)
 model = keras.Model(inputs=inputs, outputs=outputs)
 
 model.compile(optimizer='adam',
@@ -41,12 +45,10 @@ model.compile(optimizer='adam',
               metrics=['accuracy']
               )
 # %%
-model.fit(subject_text_df, target_tt, epochs=400)
+model.fit(subject_text_df, target_tt, epochs=20)
 
 # %%
 # 결과값 이름으로 도출 [:n] - n 개 만큼
-
-
 def return_target(intclasses):
     reco_target = {}
     for intclass in intclasses:

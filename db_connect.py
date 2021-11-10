@@ -26,4 +26,3 @@ for key, s in target_df.subject.iteritems():
     print(key, s['lCategory'] + ' ' + s['mCategory'] + ' ' + s['sCategory'])
 subject_df = pd.DataFrame(tmp)
 subject_df.to_csv('./data/target-subject.csv')
-# %%
